@@ -7,6 +7,7 @@ import cloud.swiftnode.ksecurity.abstraction.processor.UpdateCheckProcessor;
 import cloud.swiftnode.ksecurity.command.Commands;
 import cloud.swiftnode.ksecurity.listener.PlayerListener;
 import cloud.swiftnode.ksecurity.listener.ServerListener;
+import cloud.swiftnode.ksecurity.module.kantipup.KAntiPUP;
 import cloud.swiftnode.ksecurity.module.kspam.KSpam;
 import cloud.swiftnode.ksecurity.module.kvaccine.KVaccine;
 import cloud.swiftnode.ksecurity.util.Config;
@@ -27,8 +28,7 @@ public class KSecurity extends JavaPlugin {
     public void onLoad() {
         inst = this;
         Config.init();
-        new InjectionProcessor().process();
-        moduleManager.addModule(KSpam.class, KVaccine.class)
+        moduleManager.addModule(KSpam.class, KVaccine.class, KAntiPUP.class)
                 .loadModules();
     }
 
@@ -45,6 +45,7 @@ public class KSecurity extends JavaPlugin {
                 .addKey(Lang.Key.KSPAM_VERSION, Lang.Key.MODULES_INFO)
                 .addVal(Static.getVersion(), Lang.MODULES_INFO)
                 .build(false, 1));
+        new InjectionProcessor().process();
     }
 
     @Override

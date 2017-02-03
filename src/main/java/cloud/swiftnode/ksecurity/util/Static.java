@@ -1,6 +1,7 @@
 package cloud.swiftnode.ksecurity.util;
 
 import cloud.swiftnode.ksecurity.KSecurity;
+import cloud.swiftnode.ksecurity.abstraction.mock.MockCommandSender;
 import cloud.swiftnode.ksecurity.abstraction.mock.MockPlugin;
 import cloud.swiftnode.ksecurity.module.Module;
 import cloud.swiftnode.ksecurity.module.kspam.abstraction.SpamExecutor;
@@ -14,14 +15,22 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+
 
 /**
  * Created by Junhyeong Lim on 2017-01-10.
@@ -44,8 +53,12 @@ public class Static {
     }
 
     public static void consoleMsg(String... msgs) {
+        CommandSender sender = Bukkit.getConsoleSender();
+        if (sender == null) {
+            sender = new MockCommandSender();
+        }
         for (String msg : msgs) {
-            Bukkit.getConsoleSender().sendMessage(msg);
+            sender.sendMessage(msg);
         }
     }
 
@@ -170,7 +183,7 @@ public class Static {
             if (prefix) {
                 ret += Lang.PREFIX.toString();
             }
-            ret += module.getName() + " Module: &f" + module.getSimpleVersion();
+            ret += module.getName() + " 모듈: &f" + module.getSimpleVersion();
         }
         return Lang.colorize(ret);
     }
@@ -180,5 +193,40 @@ public class Static {
         for (String str : splited) {
             sender.sendMessage(str);
         }
+    }
+
+    public static String getPID() {
+        String jvm = ManagementFactory.getRuntimeMXBean().getName();
+        return jvm.substring(0, jvm.indexOf('@'));
+    }
+
+    public static File generateAgentJar(Class agent, Class... resources) throws IOException {
+        File jarFile = File.createTempFile("agent", ".jar");
+        jarFile.deleteOnExit();
+
+        Manifest manifest = new Manifest();
+        Attributes mainAttributes = manifest.getMainAttributes();
+        // Create manifest stating that agent is allowed to transform classes
+        mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        mainAttributes.put(new Attributes.Name("Agent-Class"), agent.getName());
+        mainAttributes.put(new Attributes.Name("Can-Retransform-Classes"), "true");
+        mainAttributes.put(new Attributes.Name("Can-Redefine-Classes"), "true");
+
+        JarOutputStream jos = new JarOutputStream(new FileOutputStream(jarFile), manifest);
+
+        jos.putNextEntry(new JarEntry(agent.getName().replace('.', '/') + ".class"));
+
+        jos.write(Instruments.getBytesFromStream(agent.getClassLoader().getResourceAsStream(Instruments.toClassName(agent))));
+        jos.closeEntry();
+
+        for (Class clazz : resources) {
+            String name = Instruments.toClassName(clazz);
+            jos.putNextEntry(new JarEntry(name));
+            jos.write(Instruments.getBytesFromStream(clazz.getClassLoader().getResourceAsStream(name)));
+            jos.closeEntry();
+        }
+
+        jos.close();
+        return jarFile;
     }
 }

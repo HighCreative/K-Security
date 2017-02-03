@@ -3,6 +3,7 @@ package cloud.swiftnode.ksecurity.module.kvaccine.abstraction.processor;
 import cloud.swiftnode.ksecurity.KSecurity;
 import cloud.swiftnode.ksecurity.abstraction.Processor;
 import cloud.swiftnode.ksecurity.module.kvaccine.abstraction.asm.KClassVisitor;
+import cloud.swiftnode.ksecurity.util.Instruments;
 import cloud.swiftnode.ksecurity.util.Lang;
 import cloud.swiftnode.ksecurity.util.Reflections;
 import cloud.swiftnode.ksecurity.util.Static;
@@ -47,7 +48,7 @@ public class VirusScanProcessor implements Processor {
             KClassVisitor classVisitor = new KClassVisitor(Opcodes.ASM5);
             ClassReader reader;
             try {
-                reader = new ClassReader(cls.getClassLoader().getResourceAsStream(cls.getName().replaceAll("\\.", "/") + ".class"));
+                reader = new ClassReader(Instruments.getBytesFromClass(cls));
             } catch (Exception e) {
                 continue;
             }
@@ -96,7 +97,7 @@ public class VirusScanProcessor implements Processor {
         }
 
         public List<Class<?>> getClasses() throws NoSuchFieldException, IllegalAccessException {
-            Map<String, Class<?>> classMap = (Map<String, Class<?>>) Reflections.getDeclaredFieldObject(handle, "classes");
+            Map<String, Class<?>> classMap = (Map<String, Class<?>>) Reflections.getDecFieldObject(handle.getClass(), handle, "classes");
             return new ArrayList<>(classMap.values());
         }
     }

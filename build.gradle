@@ -50,6 +50,7 @@ shadowJar {
     classifier = ''
     dependencies {
         include dependency('org.ow2.asm:asm')
+        include dependency('com.ea.agentloader:ea-agent-loader')
     }
 }
 

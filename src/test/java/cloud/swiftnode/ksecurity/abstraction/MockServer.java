@@ -1,5 +1,6 @@
 package cloud.swiftnode.ksecurity.abstraction;
 
+import cloud.swiftnode.ksecurity.abstraction.mock.MockCommandSender;
 import com.avaje.ebean.config.ServerConfig;
 import org.bukkit.BanList;
 import org.bukkit.ChatColor;
