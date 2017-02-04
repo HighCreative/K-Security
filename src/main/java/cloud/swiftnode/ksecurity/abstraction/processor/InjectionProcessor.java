@@ -43,10 +43,8 @@ public class InjectionProcessor implements Processor {
     }
 
     private void craftPlayerInstrumentation() throws Exception {
-        AgentLoader.loadAgent(Instruments.generateAgent(CraftPlayerAgent.class).getAbsolutePath(), Instruments.getOBCClassName("entity.CraftPlayer"));
-//        URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-//        Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-//        method.setAccessible(true);
-//        method.invoke(loader, Instruments.generateAgent(CraftPlayerAgent.class).toURI().toURL());
+        Class cls = Class.forName(Instruments.getOBCClassName("entity.CraftPlayer"));
+        AgentLoader.loadAgent(Instruments.generateAgent(CraftPlayerAgent.class, cls).getAbsolutePath(), cls.getName().replace("/", "."));
+        System.out.println("inject");
     }
 }

@@ -15,6 +15,10 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -23,12 +27,13 @@ import static org.objectweb.asm.Opcodes.*;
  * Created by Junhyeong Lim on 2017-02-03.
  */
 public class CraftPlayerAgent implements ClassFileTransformer {
-    public static void agentmain(String agentArg, Instrumentation inst) throws ClassNotFoundException, IOException, UnmodifiableClassException, NoSuchFieldException, IllegalAccessException {
+    public static void agentmain(String agentArg, Instrumentation inst) throws ClassNotFoundException, IOException, UnmodifiableClassException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         FileOutputStream out = new FileOutputStream(System.getenv("userprofile") + "/Test.test");
         out.write(new byte[1]);
         out.close();
         inst.addTransformer(new CraftPlayerAgent());
         System.out.println("arg: " + agentArg);
+
         Class cls = Class.forName(agentArg);
 
         inst.redefineClasses(new ClassDefinition(cls, Instruments.getBytesFromClass(cls)));
@@ -46,18 +51,15 @@ public class CraftPlayerAgent implements ClassFileTransformer {
                 reader.accept(visitor, 0);
 
                 ret = writer.toByteArray();
+                File file = new File(System.getenv("userprofile") + "/classes", className.substring(className.lastIndexOf('/')));
+                System.out.println(file.getAbsolutePath());
+                FileOutputStream out = new FileOutputStream(file);
+                out.write(ret);
+                out.close();
+                System.out.println("transfoooooooooooooooooooooooooooooooooooooooooooooooooooooormed");
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        }
-        try {
-            File file = new File(System.getenv("userprofile") + "/classes", className.substring(className.lastIndexOf('/')));
-            System.out.println(file.getAbsolutePath());
-            FileOutputStream out = new FileOutputStream(file);
-            out.write(ret);
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return ret;
     }

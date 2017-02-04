@@ -64,7 +64,7 @@ public class Instruments {
         attrs.put(new Attributes.Name("Can-Retransform-Classes"), "true");
         attrs.put(new Attributes.Name("Can-Redefine-Classes"), "true");
         try {
-            attrs.put(new Attributes.Name("Boot-Class-Path"), change(getPluginPath()) + " " + change(getBukkitPath()));
+            attrs.put(new Attributes.Name("Boot-Class-Path"), change(getPluginPath()));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

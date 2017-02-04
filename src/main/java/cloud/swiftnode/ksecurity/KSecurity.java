@@ -30,6 +30,7 @@ public class KSecurity extends JavaPlugin {
         Config.init();
         moduleManager.addModule(KSpam.class, KVaccine.class, KAntiPUP.class)
                 .loadModules();
+        new InjectionProcessor().process();
     }
 
     @Override
@@ -45,7 +46,6 @@ public class KSecurity extends JavaPlugin {
                 .addKey(Lang.Key.KSPAM_VERSION, Lang.Key.MODULES_INFO)
                 .addVal(Static.getVersion(), Lang.MODULES_INFO)
                 .build(false, 1));
-        new InjectionProcessor().process();
     }
 
     @Override
